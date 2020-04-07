@@ -1,0 +1,5 @@
+---
+- version: v1
+  group: logging.ocp.io
+  kind: SplunkConnect
+  role: /opt/ansible/roles/splunkconnect

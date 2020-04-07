@@ -1,0 +1,14 @@
+---
+secret_name: splunk-hec
+label:
+    app: "splunk-logs-forwarder"
+
+configmap_name: logs-forwarder-conf
+
+splunk_hec_host: "https://splunk.com"
+splunk_hec_protocol: https
+splunk_port: 8080
+
+#cluster_name:
+
+k8s_validate_cert: yes

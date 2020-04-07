@@ -1,0 +1,22 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: splunkconnects.logging.ocp.io
+spec:
+  group: logging.ocp.io
+  names:
+    kind: SplunkConnect
+    listKind: SplunkConnectList
+    plural: splunkconnects
+    singular: splunkconnect
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
+  versions:
+  - name: v1
+    served: true
+    storage: true

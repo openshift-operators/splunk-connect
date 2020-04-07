@@ -2,7 +2,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: super-project-operator
+  name: splunk-connect-operator
   namespace: inf
 objects:
 
@@ -44,7 +44,7 @@ objects:
   groupNames: null
   kind: ClusterRoleBinding
   metadata:
-    name: super-project-cluster-admin
+    name: splunk-connect-operator-cluster-admin
   roleRef:
     name: cluster-admin
   subjects:
@@ -52,7 +52,7 @@ objects:
       name: splunk-connect
       namespace: splunk-connect-operator
   userNames:
-    - system:serviceaccount:super-project-operator:super-project
+    - system:serviceaccount:splunk-connect-operator:splunk-connect
 
 - kind: RoleBinding
   apiVersion: rbac.authorization.k8s.io/v1
@@ -70,84 +70,84 @@ objects:
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
-    namespace: splunk-connect-operator
-    creationTimestamp: null
-    name: splunk-connect
+   creationTimestamp: null
+   name: splunk-connect
   rules:
-    - apiGroups:
-        - ""
-      resources:
-        - pods
-        - services
-        - services/finalizers
-        - endpoints
-        - persistentvolumeclaims
-        - events
-        - configmaps
-        - secrets
-      verbs:
-        - create
-        - delete
-        - get
-        - list
-        - patch
-        - update
-        - watch
-    - apiGroups:
-        - apps
-      resources:
-        - deployments
-        - daemonsets
-        - replicasets
-        - statefulsets
-      verbs:
-        - create
-        - delete
-        - get
-        - list
-        - patch
-        - update
-        - watch
-    - apiGroups:
-        - monitoring.coreos.com
-      resources:
-        - servicemonitors
-      verbs:
-        - get
-        - create
-    - apiGroups:
-        - apps
-      resourceNames:
-        - super-project
-      resources:
-        - deployments/finalizers
-      verbs:
-        - update
-    - apiGroups:
-        - ""
-      resources:
-        - pods
-      verbs:
-        - get
-    - apiGroups:
-        - apps
-      resources:
-        - replicasets
-        - deployments
-      verbs:
-        - get
-    - apiGroups:
-        - automation.ocp.io
-      resources:
-        - '*'
-      verbs:
-        - create
-        - delete
-        - get
-        - list
-        - patch
-        - update
-        - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+      - services/finalizers
+      - endpoints
+      - persistentvolumeclaims
+      - events
+      - configmaps
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+      - replicasets
+      - statefulsets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - get
+      - create
+  - apiGroups:
+      - apps
+    resourceNames:
+      - splunk-connect
+    resources:
+      - deployments/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+  - apiGroups:
+      - apps
+    resources:
+      - replicasets
+      - deployments
+    verbs:
+      - get
+  - apiGroups:
+      - logging.ocp.io
+    resources:
+      - '*'
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
 
 - apiVersion: "image.openshift.io/v1"
   kind: ImageStream
@@ -179,6 +179,8 @@ objects:
       git:
         ref: ${GIT_BRANCH}
         uri: ${GIT_REPO}
+      sourceSecret:
+        name: ${GIT_CLONE_SECRET}
       type: Git
     strategy:
       type: Docker
@@ -187,6 +189,16 @@ objects:
     successfulBuildsHistoryLimit: 5
     triggers:
       - type: ConfigChange
+
+
+-  apiVersion: v1
+   kind: Secret
+   metadata:
+      name:   splunk-hec
+   type: Opaque
+   data:
+     splunk_hec_token: ${HEC_TOKEN_B64}
+
 
 - apiVersion: apps/v1
   kind: Deployment
@@ -248,3 +260,11 @@ parameters:
   - name: GIT_BRANCH
     required: true
     value: master
+
+  - name: HEC_TOKEN_B64
+    required: true
+    description: "Splunk HEC token base64"
+
+  - name: GIT_CLONE_SECRET
+    required: true
+    value: gitlab-shared-service-account

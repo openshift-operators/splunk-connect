@@ -1,0 +1,7 @@
+apiVersion: logging.ocp.io/v1
+kind: SplunkConnect
+metadata:
+  name: example-splunkconnect
+spec:
+  # Add fields here
+  size: 3
