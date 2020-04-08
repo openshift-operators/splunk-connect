@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: splunk-kubernetes-objects
+  namespace: {{ meta.namespace }}
+  labels:
+    app: splunk-kubernetes-objects
+    version: 1.4.0
+data:
+  fluent.conf: |
+    <system>
+      log_level info
+    </system>
+    <source>
+      @type kubernetes_objects
+      tag kube.objects.*
+      api_version "v1"
+      insecure_ssl true
+      <pull>
+        resource_name pods
+      </pull>
+      <pull>
+        resource_name namespaces
+      </pull>
+      <pull>
+        resource_name nodes
+      </pull>
+      <watch>
+        resource_name events
+      </watch>
+    </source>
+
+    <filter kube.**>
+      @type jq_transformer
+      # in ruby '\\' will escape and become just '\', since we need two '\' in the `gsub` jq filter, it becomes '\\\\'.
+      jq '.record.source = "namespace:\(env.MY_NAMESPACE)/pod:\(env.MY_POD_NAME)" | .record.sourcetype = (.tag | gsub("\\\\."; ":")) | .record'
+    </filter>
+
+    <filter kube.**>
+      @type jq_transformer
+      jq '.record.cluster_name = "cluster_name" | .record'
+    </filter>
+
+    # = custom filters specified by users =
+
+    <match kube.**>
+      @type splunk_hec
+      protocol https
+      index {{ object_index }}
+      hec_host "{{ splunk_hec_host }}"
+      hec_port {{ splunk_port }}
+      hec_token "#{ENV['SPLUNK_HEC_TOKEN']}"
+      host "#{ENV['NODE_NAME']}"
+      source_key source
+      sourcetype_key sourcetype
+      insecure_ssl true
+      <fields>
+        cluster_name
+      </fields>
+      <buffer>
+        @type memory
+        chunk_limit_records 10000
+        chunk_limit_size 200m
+        flush_interval 3s
+        flush_thread_count 1
+        overflow_action block
+        retry_max_times 3
+        total_limit_size 600m
+      </buffer>
+    </match>

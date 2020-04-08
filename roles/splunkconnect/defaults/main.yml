@@ -5,6 +5,9 @@ label:
 
 configmap_name: logs-forwarder-conf
 
+logs_index: "openshift_logs"
+object_index: "openshift_objects"
+
 splunk_hec_host: "https://splunk.com"
 splunk_hec_protocol: https
 splunk_port: 8080

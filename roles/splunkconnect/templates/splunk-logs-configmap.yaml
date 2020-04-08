@@ -150,6 +150,7 @@ data:
       <match **>
         @type splunk_hec
         protocol https
+        index {{ logs_index }}
         hec_host "{{ splunk_hec_host }}"
         hec_port {{ splunk_port }}
         hec_token "#{ENV['SPLUNK_HEC_TOKEN']}"

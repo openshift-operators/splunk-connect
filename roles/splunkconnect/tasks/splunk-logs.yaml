@@ -1,0 +1,43 @@
+---
+- name: Create SCC for Splunk - Fluentd hostPath mounting
+  k8s:
+    state: present
+    verify_ssl: "{{ k8s_validate_cert }}"
+    definition: "{{ lookup('template', 'scc.yaml') | from_yaml }}"
+
+- name: Create or update configmap
+  k8s:
+    state: present
+    verify_ssl: "{{ k8s_validate_cert }}"
+    definition:  "{{ lookup('template', 'splunk-logs-configmap.yaml') | from_yaml }}"
+  register: fluentd_conf
+
+- block:
+    - k8s_facts:
+        verify_ssl: "{{ k8s_validate_cert }}"
+        kind: Pod
+        namespace: "{{ meta.namespace }}"
+        label_selectors:
+          - "app={{ label.app }}"
+      register: fluentd_pods
+
+    - name: Remove ALL Fluentd pods
+      k8s:
+        verify_ssl: "{{ k8s_validate_cert }}"
+        kind: Pod
+        state: absent
+        namespace: "{{ meta.namespace }}"
+        name: "{{ item.metadata.name }}"
+      loop: "{{ fluentd_pods.resources }}"
+  when:  fluentd_conf.changed == true
+
+
+- name: Create or update  daemonset
+  k8s:
+    verify_ssl: "{{ k8s_validate_cert }}"
+    state: present
+    definition:  "{{ lookup('template', 'splunk-logs-daemonset.yaml') | from_yaml }}"
+
+
+
+

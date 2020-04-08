@@ -1,0 +1,127 @@
+- name: Cluster role for  pulling cluster objects
+  k8s:
+    state: present
+    apply: yes
+    force: yes
+    definition:
+          kind: ClusterRole
+          apiVersion: rbac.authorization.k8s.io/v1
+          metadata:
+            name: splunk-kubernetes-objects
+            labels:
+              app: splunk-kubernetes-objects
+              version: 1.4.0
+          rules:
+            - apiGroups:
+                - ''
+              resources:
+                - pods
+                - namespaces
+                - nodes
+              verbs:
+                - get
+                - list
+            - apiGroups:
+                - ''
+              resources:
+                - events
+              verbs:
+                - watch
+
+
+- name: Create cluster rolebinding for default service account
+  k8s:
+    state: present
+    apply: yes
+    force: yes
+    definition:
+      apiVersion: authorization.openshift.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: splunk-object-viewer
+      roleRef:
+        name: splunk-kubernetes-objects
+      subjects:
+        - kind: ServiceAccount
+          name: openshift-monitoring
+          namespace: openshift-monitoring
+      userNames:
+        - system:serviceaccount:{{ meta.namespace }}:default
+
+- name: Create splunk-objects configMap
+  k8s:
+    state: present
+    apply: yes
+    definition: "{{ lookup('template', 'splunk-objects-configmap.yaml') | from_yaml }}"
+
+- name: Splunk objects deployment
+  k8s:
+    state: present
+    apply: yes
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        namespace: "{{ meta.namespace }}"
+        name: splunk-kubernetes-objects
+        labels:
+          app: splunk-kubernetes-objects
+          version: 1.4.0
+      spec:
+        strategy:
+          type: RollingUpdate
+        selector:
+          matchLabels:
+            app: splunk-kubernetes-objects
+            engine: fluentd
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              app: splunk-kubernetes-objects
+              engine: fluentd
+              version: 1.4.0
+            annotations: {}
+          spec:
+            terminationGracePeriodSeconds: 30
+            nodeSelector:
+              beta.kubernetes.io/os: linux
+            containers:
+              - name: splunk-fluentd-k8s-objects
+                image: docker.io/splunk/kube-objects:1.1.3
+                imagePullPolicy: Always
+                env:
+                  - name: MY_NAMESPACE
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: metadata.namespace
+                  - name: MY_POD_NAME
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: metadata.name
+                  - name: NODE_NAME
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: spec.nodeName
+                  - name: SPLUNK_HEC_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: "{{ secret_name }}"
+                        key: splunk_hec_token
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 200Mi
+                volumeMounts:
+                  - name: conf-configmap
+                    mountPath: "/fluentd/etc"
+                  - name: secrets
+                    mountPath: "/fluentd/etc/splunk"
+                    readOnly: true
+            volumes:
+              - name: conf-configmap
+                configMap:
+                  name: splunk-kubernetes-objects
+              - name: secrets
+                secret:
+                  secretName: "{{ secret_name }}"
