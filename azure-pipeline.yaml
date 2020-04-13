@@ -1,0 +1,36 @@
+trigger:
+  - master
+  - dev
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: Docker@2
+    displayName: "Login docker registry"
+    inputs:
+      command: login
+      containerRegistry: quay.io
+
+  - task: Docker@2
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    displayName: "Build  operator image for stable master branch"
+    inputs:
+      Dockerfile: "**/build/Dockerfile"
+      buildContext: "."
+      command: buildAndPush
+      repository: openshift-operators/splunk-connect
+      tags: |
+        latest
+
+
+  - task: Docker@2
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+    displayName: "Build  operator image for DEV branch"
+    inputs:
+      Dockerfile: "**/build/Dockerfile"
+      buildContext: "."
+      command: buildAndPush
+      repository: openshift-operators/splunk-connect
+      tags: |
+        dev
