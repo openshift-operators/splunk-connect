@@ -19,7 +19,7 @@ steps:
       Dockerfile: "**/build/Dockerfile"
       buildContext: "."
       command: buildAndPush
-      repository: openshift-operators/splunk-connect
+      repository: openshift-operators/$(Build.Repository.Name)
       tags: |
         latest
 
@@ -31,6 +31,6 @@ steps:
       Dockerfile: "**/build/Dockerfile"
       buildContext: "."
       command: buildAndPush
-      repository: openshift-operators/splunk-connect
+      repository: openshift-operators/$(Build.Repository.Name)
       tags: |
         dev
