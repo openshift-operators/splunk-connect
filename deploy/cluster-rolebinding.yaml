@@ -1,0 +1,14 @@
+---
+apiVersion: authorization.openshift.io/v1
+groupNames: null
+kind: ClusterRoleBinding
+metadata:
+  name: splunk-connect-operator-cluster-admin
+roleRef:
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: splunk-connect
+    namespace: splunk-connect-operator
+userNames:
+  - system:serviceaccount:splunk-connect-operator:splunk-connect

@@ -1,10 +1,5 @@
 ---
 secret_name: splunk-hec
-label:
-    app: "splunk-logs-forwarder"
-
-configmap_name: logs-forwarder-conf
-
 logs_index: "openshift_logs"
 object_index: "openshift_objects"
 

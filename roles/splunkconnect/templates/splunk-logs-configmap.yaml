@@ -2,14 +2,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ configmap_name }}"
+  name: "logs-forwarder-conf"
   namespace: "{{ meta.namespace }}"
   labels:
-    app: "{{ label.app }}"
-    version: 1.2.0
+    app: "splunk-logs-forwarder"
 data:
   fluent.conf: |-
-
     @include system.conf
     @include source.containers.conf
     @include source.files.conf

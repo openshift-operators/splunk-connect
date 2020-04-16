@@ -53,6 +53,26 @@
     state: present
     apply: yes
     definition: "{{ lookup('template', 'splunk-objects-configmap.yaml') | from_yaml }}"
+  register: objects_collector_conf
+
+- block:
+    - k8s_facts:
+        verify_ssl: "{{ k8s_validate_cert }}"
+        kind: Pod
+        namespace: "{{ meta.namespace }}"
+        label_selectors:
+          - "app=splunk-kubernetes-objects"
+      register: objects_collector_pods
+
+    - name: Remove objects  collctor pod for apply new configuration
+      k8s:
+        verify_ssl: "{{ k8s_validate_cert }}"
+        kind: Pod
+        state: absent
+        namespace: "{{ meta.namespace }}"
+        name: "{{ item.metadata.name }}"
+      loop: "{{ objects_collector_pods.resources }}"
+  when:  objects_collector_conf.changed == true
 
 - name: Splunk objects deployment
   k8s:
@@ -66,7 +86,6 @@
         name: splunk-kubernetes-objects
         labels:
           app: splunk-kubernetes-objects
-          version: 1.4.0
       spec:
         strategy:
           type: RollingUpdate
