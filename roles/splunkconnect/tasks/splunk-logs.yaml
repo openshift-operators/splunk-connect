@@ -14,7 +14,7 @@
           subjects:
             - kind: ServiceAccount
               name: default
-              namespace: splunk-connect-operator
+              namespace: "{{ meta.namespace }}"
           userNames:
             - "system:serviceaccount:{{ meta.namespace }}:default"
 
