@@ -1,4 +1,23 @@
 ---
+- name: Create cluster role binding for access to pods metadata
+  k8s:
+    state: present
+    verify_ssl: "{{ k8s_validate_cert }}"
+    apply: yes
+    definition:
+          apiVersion: authorization.openshift.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: splunk-connect
+          roleRef:
+            name: view
+          subjects:
+            - kind: ServiceAccount
+              name: default
+              namespace: splunk-connect-operator
+          userNames:
+            - "system:serviceaccount:{{ meta.namespace }}:default"
+
 - name: Create SCC for Splunk - Fluentd hostPath mounting
   k8s:
     state: present
