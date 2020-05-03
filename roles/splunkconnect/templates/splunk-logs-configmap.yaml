@@ -474,6 +474,7 @@ data:
           label_app ${record.dig("kubernetes","labels","app")}
           label_k8s-app ${record.dig("kubernetes","labels","k8s-app")}
           label_release ${record.dig("kubernetes","labels","release")}
+          label_deploymentconfig ${record.dig("kubernetes","labels","deploymentconfig")}
           blacklist ${record.dig("kubernetes", "annotations", "splunk.com/exclude") ? record.dig("kubernetes", "annotations", "splunk.com/exclude") : record.dig("kubernetes", "namespace_annotations", "splunk.com/exclude") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/exclude"]) : ("false")}
         </record>
       </filter>
@@ -516,7 +517,7 @@ data:
          hec_host "{{ splunk_hec_host }}"
          hec_port {{ splunk_port }}
          hec_token "#{ENV['SPLUNK_HEC_TOKEN']}"
-         host "{{ cluster_name }}"
+         host "#{ENV['NODE_NAME']}"
          source_key source
          sourcetype_key sourcetype
          insecure_ssl true
@@ -532,6 +533,7 @@ data:
           container_id
           cluster_name
           label_app
+          label_deploymentconfig
           label_k8s-app
           label_release
         </fields>

@@ -8,5 +8,5 @@ splunk_hec_protocol: https
 splunk_port: 8080
 
 #cluster_name:
-
+objects_pull_interval: 2m
 k8s_validate_cert: yes

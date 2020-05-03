@@ -1,4 +1,16 @@
 ---
+- name: Patch operator namespace for start log aggregation agent everywhere
+  k8s:
+    state: present
+    verify_ssl: "{{ k8s_validate_cert }}"
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ meta.namespace }}"
+        annotations:
+          openshift.io/node-selector: beta.kubernetes.io/os=linux
+
 - name: Create cluster role binding for access to pods metadata
   k8s:
     state: present

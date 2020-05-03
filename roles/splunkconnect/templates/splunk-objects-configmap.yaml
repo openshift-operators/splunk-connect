@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: splunk-kubernetes-objects
-  namespace: {{ meta.namespace }}
+  namespace: "{{ meta.namespace }}"
   labels:
     app: splunk-kubernetes-objects
     version: 1.4.0
@@ -17,6 +17,7 @@ data:
       tag kube.objects.*
       api_version "v1"
       insecure_ssl true
+      interval "{{ objects_pull_interval }}"
       <pull>
         resource_name pods
       </pull>
@@ -39,7 +40,7 @@ data:
 
     <filter kube.**>
       @type jq_transformer
-      jq '.record.cluster_name = "cluster_name" | .record'
+      jq '.record.cluster_name = "{{ cluster_name }}" | .record'
     </filter>
 
     # = custom filters specified by users =
