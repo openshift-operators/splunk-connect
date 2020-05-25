@@ -22,9 +22,6 @@ data:
         resource_name pods
       </pull>
       <pull>
-        resource_name routes
-      </pull>
-      <pull>
         resource_name services
       </pull>
       <pull>
