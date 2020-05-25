@@ -99,7 +99,7 @@
             labels:
               app: splunk-kubernetes-objects
               engine: fluentd
-              version: 1.4.0
+              version: 1.4.1
             annotations: {}
           spec:
             terminationGracePeriodSeconds: 30

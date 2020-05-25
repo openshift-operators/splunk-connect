@@ -112,17 +112,17 @@
         labels:
           app: "splunk-logs-forwarder"
           engine: fluentd
-          version: 1.4.0
+          version: 1.4.1
       spec:
         selector:
           matchLabels:
             app: "splunk-logs-forwarder"
-            version: 1.4.0
+            version: 1.4.1
         template:
           metadata:
             labels:
               app: "splunk-logs-forwarder"
-              version: 1.4.0
+              version: 1.4.1
             annotations: {}
           spec:
             tolerations:
@@ -132,7 +132,7 @@
               beta.kubernetes.io/os: linux
             containers:
               - name: splunk-fluentd-k8s-logs
-                image: splunk/fluentd-hec:1.2.1
+                image: splunk/fluentd-hec:1.2.2
                 imagePullPolicy: Always
 #                args:
 #                  - "-c"
