@@ -92,8 +92,8 @@ data:
       @type tail
       @label @CONCAT
       tag tail.file.kube:apiserver-audit
-      path /var/log/kube-apiserver-audit.log
-      pos_file /var/log/splunk-fluentd-kube-audit.pos
+      path /var/lib/origin/audit-ocp.log
+      pos_file /var/log/splunk-fluentd-audit-ocp.pos
       read_from_head true
       path_key source
       <parse>
@@ -312,7 +312,7 @@ data:
       # extract sourcetype
       <filter tail.file.**>
         @type jq_transformer
-        jq '.record.sourcetype = (.tag | ltrimstr("tail.file.")) | .record.cluster_name = "cluster_name" | .record.index = "main" | .record'
+        jq '.record.sourcetype = (.tag | ltrimstr("tail.file.")) | .record.cluster_name = "{{ cluster_name }}" | .record.index = "{{ logs_index }}" | .record'
       </filter>
 
       # = filters for monitor agent =

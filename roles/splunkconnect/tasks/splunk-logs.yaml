@@ -170,9 +170,14 @@
                   - name: varlog
                     mountPath: "/var/log"
 
+
                   - name: varlibdockercontainers
                     mountPath: "/var/lib/docker/containers"
                     readOnly: true
+                  - name: varliborigin
+                    mountPath: "/var/lib/origin"
+                    readOnly: true
+
                   - name: journallogpath
                     mountPath: "/run/log/journal"
                     readOnly: true
@@ -186,6 +191,10 @@
               - name: varlog
                 hostPath:
                   path: "/var/log"
+
+              - name: varliborigin
+                hostPath:
+                  path: "/var/lib/origin"
 
               - name: varlibdockercontainers
                 hostPath:
